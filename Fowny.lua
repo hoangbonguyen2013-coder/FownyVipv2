@@ -4,12 +4,12 @@ local RS = game:GetService("RunService")
 
 -- 1. TẠO GUI
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "FNV4_Hub"
+screenGui.Name = "FHV4_Hub"
 
 -- Nút FNV4 có thể kéo thả
 local toggleBtn = Instance.new("TextButton", screenGui)
 toggleBtn.Size = UDim2.new(0, 100, 0, 40); toggleBtn.Position = UDim2.new(0, 10, 0.5, 0)
-toggleBtn.Text = "FNV4"; toggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+toggleBtn.Text = "FHV4"; toggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); toggleBtn.TextColor3 = Color3.new(1, 1, 1)
 toggleBtn.Draggable = true -- Cho phép kéo nút chính
 
 local mainFrame = Instance.new("Frame", screenGui)
