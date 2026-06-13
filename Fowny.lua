@@ -1,104 +1,77 @@
 local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("RunService")
+
+-- 1. TẠO GUI
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "FownyVIP_v2"
+screenGui.Name = "FNV4_Hub"
 
--- Biến lưu trữ
-local savedLocations = {}
-
--- 1. Nút Mở/Đóng Menu (Toggle)
+-- Nút FNV4 có thể kéo thả
 local toggleBtn = Instance.new("TextButton", screenGui)
-toggleBtn.Name = "ToggleButton"
-toggleBtn.Size = UDim2.new(0, 100, 0, 40)
-toggleBtn.Position = UDim2.new(0, 10, 0.5, 0)
-toggleBtn.Text = "Fowny VIP v2"
-toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
-toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+toggleBtn.Size = UDim2.new(0, 100, 0, 40); toggleBtn.Position = UDim2.new(0, 10, 0.5, 0)
+toggleBtn.Text = "FNV4"; toggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); toggleBtn.TextColor3 = Color3.new(1, 1, 1)
+toggleBtn.Draggable = true -- Cho phép kéo nút chính
 
--- 2. Menu chính (Main Frame)
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 250, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -125, 0.5, -175)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.Visible = false
-mainFrame.Active = true
-mainFrame.Draggable = true -- Tính năng kéo thả
+mainFrame.Size = UDim2.new(0, 280, 0, 500); mainFrame.Position = UDim2.new(0.5, -140, 0.5, -250)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); mainFrame.Visible = false; mainFrame.Active = true; mainFrame.Draggable = true
 
--- Tiêu đề
-local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "Fowny VIP v2 - Manager"
-title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-title.TextColor3 = Color3.new(1, 1, 1)
+local title = Instance.new("TextLabel", mainFrame); title.Size = UDim2.new(1, 0, 0, 30); title.Text = "Fowny Hub Vip v4"; title.BackgroundColor3 = Color3.fromRGB(0, 0, 0); title.TextColor3 = Color3.new(1, 1, 1)
 
--- Ô nhập tên và Nút lưu
-local nameInput = Instance.new("TextBox", mainFrame)
-nameInput.Size = UDim2.new(0.9, 0, 0, 30)
-nameInput.Position = UDim2.new(0.05, 0, 0.15, 0)
-nameInput.PlaceholderText = "Tên vị trí..."
+-- 2. BIẾN
+local savedLocations = {}
+local infJump, autoGold, autoRainbow = false, false, false
 
-local saveBtn = Instance.new("TextButton", mainFrame)
-saveBtn.Size = UDim2.new(0.9, 0, 0, 30)
-saveBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
-saveBtn.Text = "Lưu Vị Trí"
-saveBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-saveBtn.TextColor3 = Color3.new(1, 1, 1)
-
--- Danh sách vị trí
-local listFrame = Instance.new("ScrollingFrame", mainFrame)
-listFrame.Size = UDim2.new(0.9, 0, 0.55, 0)
-listFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
-listFrame.BackgroundTransparency = 1
-
--- Logic Đóng/Mở
-toggleBtn.MouseButton1Click:Connect(function()
-	mainFrame.Visible = not mainFrame.Visible
-end)
-
--- Hàm cập nhật danh sách
-local function updateList()
-	for _, child in pairs(listFrame:GetChildren()) do
-		if child:IsA("TextButton") then child:Destroy() end
-	end
-	
-	local yPos = 0
-	for name, cframe in pairs(savedLocations) do
-		local btn = Instance.new("TextButton", listFrame)
-		btn.Size = UDim2.new(1, 0, 0, 30)
-		btn.Position = UDim2.new(0, 0, 0, yPos)
-		btn.Text = name
-		btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-		btn.TextColor3 = Color3.new(1, 1, 1)
-		
-		btn.MouseButton1Click:Connect(function()
-			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-				player.Character.HumanoidRootPart.CFrame = cframe
-			end
-		end)
-		yPos = yPos + 35
-	end
-	listFrame.CanvasSize = UDim2.new(0, 0, 0, yPos)
+-- 3. HÀM TẠO NÚT
+local function createButton(text, pos, callback)
+    local btn = Instance.new("TextButton", mainFrame); btn.Size = UDim2.new(0.9, 0, 0, 35); btn.Position = pos
+    btn.Text = text; btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.MouseButton1Click:Connect(function() callback(btn) end); return btn
 end
 
--- Sự kiện lưu
-saveBtn.MouseButton1Click:Connect(function()
-	local name = nameInput.Text
-	if name ~= "" and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-		savedLocations[name] = player.Character.HumanoidRootPart.CFrame
-		nameInput.Text = ""
-		updateList()
-	end
-end)
--- Đoạn mã này sẽ ép buộc tất cả ProximityPrompt trong game thành tức thì
-game.Workspace.DescendantAdded:Connect(function(descendant)
-	if descendant:IsA("ProximityPrompt") then
-		descendant.HoldDuration = 0
-	end
+-- 4. TELEPORT LOGIC
+local nameInput = Instance.new("TextBox", mainFrame); nameInput.Size = UDim2.new(0.9, 0, 0, 30); nameInput.Position = UDim2.new(0.05, 0, 0.1, 0); nameInput.PlaceholderText = "Tên vị trí..."
+local listFrame = Instance.new("ScrollingFrame", mainFrame); listFrame.Size = UDim2.new(0.9, 0, 0.25, 0); listFrame.Position = UDim2.new(0.05, 0, 0.3, 0); listFrame.BackgroundTransparency = 1
+
+local saveBtn = createButton("Lưu Vị Trí", UDim2.new(0.05, 0, 0.2, 0), function()
+    if nameInput.Text ~= "" and player.Character:FindFirstChild("HumanoidRootPart") then
+        local name = nameInput.Text; savedLocations[name] = player.Character.HumanoidRootPart.CFrame
+        local container = Instance.new("Frame", listFrame); container.Size = UDim2.new(1, 0, 0, 30); container.BackgroundTransparency = 1; container.Position = UDim2.new(0,0,0, #listFrame:GetChildren()*35)
+        local btn = Instance.new("TextButton", container); btn.Size = UDim2.new(0.7, 0, 1, 0); btn.Text = name
+        btn.MouseButton1Click:Connect(function() if player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = savedLocations[name] end end)
+        local del = Instance.new("TextButton", container); del.Size = UDim2.new(0.3, 0, 1, 0); del.Position = UDim2.new(0.7, 0, 0, 0); del.Text = "Xóa"; del.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+        del.MouseButton1Click:Connect(function() container:Destroy() end)
+    end
 end)
 
--- Áp dụng cho những vật đã có sẵn từ trước
-for _, v in pairs(game.Workspace:GetDescendants()) do
-	if v:IsA("ProximityPrompt") then
-		v.HoldDuration = 0
-	end
-end
+-- 5. CHỨC NĂNG KHÁC (ĐÃ SỬA LỖI TP)
+createButton("Nhảy vô hạn: TẮT", UDim2.new(0.05, 0, 0.6, 0), function(btn)
+    infJump = not infJump; btn.Text = infJump and "Nhảy vô hạn: BẬT" or "Nhảy vô hạn: TẮT"; btn.BackgroundColor3 = infJump and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(40, 40, 40)
+end)
+createButton("Auto Gold: TẮT", UDim2.new(0.05, 0, 0.7, 0), function(btn)
+    autoGold = not autoGold; btn.Text = autoGold and "Auto Gold: BẬT" or "Auto Gold: TẮT"; btn.BackgroundColor3 = autoGold and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(40, 40, 40)
+end)
+createButton("Auto Rainbow: TẮT", UDim2.new(0.05, 0, 0.8, 0), function(btn)
+    autoRainbow = not autoRainbow; btn.Text = autoRainbow and "Auto Rainbow: BẬT" or "Auto Rainbow: TẮT"; btn.BackgroundColor3 = autoRainbow and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(40, 40, 40)
+end)
+
+-- 6. LOGIC
+toggleBtn.MouseButton1Click:Connect(function() mainFrame.Visible = not mainFrame.Visible end)
+UIS.JumpRequest:Connect(function() if infJump and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid:ChangeState("Jumping") end end)
+
+task.spawn(function()
+    while task.wait(0.6) do -- Tăng thời gian chờ để ổn định
+        if (autoGold or autoRainbow) and player.Character:FindFirstChild("HumanoidRootPart") then
+            for _, obj in pairs(game.Workspace:GetDescendants()) do
+                if obj:IsA("ProximityPrompt") and obj.ActionText == "CLAIM" then
+                    local pName = obj.Parent.Name
+                    if (autoGold and pName:find("Gold")) or (autoRainbow and pName:find("Rainbow")) then
+                        -- TP lệch ra ngoài 3 studs để không bị kẹt trong vật thể
+                        player.Character.HumanoidRootPart.CFrame = obj.Parent:GetPivot().CFrame + Vector3.new(0,3,0)
+                        fireproximityprompt(obj)
+                    end
+                end
+            end
+        end
+    end
+end)
